@@ -65,6 +65,8 @@ case "$1" in
         remote_dir="$(select_directory)"
         echo "LOCAL=\"$local_dir\"" >> "$reg"
         echo "REMOTE=\"$remote_dir\"" >> "$reg"
+        echo Sync: "$local_dir" "$remote_dir"
+        bisync "$local_dir" "$remote_dir"
         ;;
     "h"|*) echo "$h";;
 esac
