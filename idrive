@@ -35,9 +35,9 @@ select_and_sync() {
 sync_all() {
     for reg in $(ls_folders); do
         source "$RCLONE_REGISTRY/$reg"
-        echo $LOCAL $REMOTE
+        echo "$LOCAL" "$REMOTE"
     done
-    bisync $LOCAL $REMOTE
+    bisync "$LOCAL" "$REMOTE"
 }
 
 select_directory() {
