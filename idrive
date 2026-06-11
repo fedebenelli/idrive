@@ -12,6 +12,7 @@ if not set.
 arguments:
 s: Select one of the cloned directories and bisync it.
 c: <remote> <local>: Clone the remote into a specified directory.
+ca: bisync all the directories in the registry.
 "
 
 bisync() {
