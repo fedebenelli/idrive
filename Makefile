@@ -4,9 +4,6 @@
 DESTDIR="$(HOME)/.local"
 CONFIG="$(XDG_CONFIG_DIR)/rclone"
 
-test:
-	@echo ${CONFIG}
-
 install:
 	@chmod 755 idrive
 	@mkdir -vp "${DESTDIR}/bin"
