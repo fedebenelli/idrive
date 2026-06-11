@@ -1,0 +1,70 @@
+#!/bin/sh
+
+
+h="drive [args]
+rclone handler to automate the syncronization of Google Drive remotes.
+This script assumes that the user already has configured the rclone remote.
+
+Each cloned directory is stored as a configuration file at the moment of 
+cloning in '$RCLONE_REGISTRY' (defaults to '${XDG_CONFIG_DIR/rclone/registry}' 
+if not set.
+
+arguments:
+s: Select one of the cloned directories and bisync it.
+c: <remote> <local>: Clone the remote into a specified directory.
+"
+
+bisync() {
+    folder_local="$1"
+    folder_servr="$2"
+    rclone bisync "$folder_local" "$folder_servr" --resync
+}
+
+ls_folders() {
+    ls "$RCLONE_REGISTRY"
+}
+
+select_and_sync() {
+    selected="$(ls_folders | dmenu)"
+    source "$RCLONE_REGISTRY/$selected"
+    echo Sync: "$LOCAL" "$REMOTE"
+    bisync "$LOCAL" "$REMOTE"
+}
+
+sync_all() {
+    for reg in $(ls_folders); do
+        source "$RCLONE_REGISTRY/$reg"
+        echo $LOCAL $REMOTE
+    done
+    bisync $LOCAL $REMOTE
+}
+
+select_directory() {
+    remote=$(rclone listremotes | fzf)
+    echo "${remote}/$(rclone lsjson -R $remote |
+        jq -r '.[] | select(.IsDir == true) | .Path' |
+        fzf)"
+}
+
+
+if [[ -z $RCLONE_REGISTRY ]]; then
+    RCLONE_REGISTRY="${XDG_CONFIG_DIR}/rclone/registry"
+fi
+
+case "$1" in
+    "s") 
+        select_and_sync;;
+    "sa")
+        sync_all;;
+    "c") 
+        # Cloning a new directory.
+        read -p "Named to save in registry: " registry_name
+        reg="$RCLONE_REGISTRY/$registry_name"
+        echo "NAME=${registry_name}" > "$reg"
+        local_dir="$(pwd)"
+        remote_dir="$(select_directory)"
+        echo "LOCAL=\"$local_dir\"" >> "$reg"
+        echo "REMOTE=\"$remote_dir\"" >> "$reg"
+        ;;
+    "h"|*) echo "$h";;
+esac
